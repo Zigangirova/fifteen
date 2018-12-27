@@ -3,9 +3,9 @@ import java.awt.*;
 
 public class Game
 {
-    boolean packFrame = false;
-    /**Construct the application*/
-    public Game()
+    private boolean packFrame = false;
+
+    private Game()
     {
         Frame frame = new Frame();
         //Validate frames that have preset sizes
