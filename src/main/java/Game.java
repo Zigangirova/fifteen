@@ -8,9 +8,7 @@ public class Game
     private Game()
     {
         Frame frame = new Frame();
-        //Validate frames that have preset sizes
-        //Pack frames that have useful preferred
-        //size info, e.g. from their layout
+
         if (packFrame)
         {
             frame.pack();

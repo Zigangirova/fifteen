@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Frame extends JFrame {
     private JPanel gamePane = new JPanel();
@@ -8,6 +10,7 @@ public class Frame extends JFrame {
     private JLabel status = new JLabel();
     private JButton[][] buttons = new JButton[4][4];
     private Board field = new Board();
+    private Matrix<Integer> solverMatrix = new MatrixImpl(4, 4, 0);
 
     /**
      * Construct the frame
@@ -24,7 +27,7 @@ public class Frame extends JFrame {
     /**
      * Component initialization
      */
-    private void jbInit() {
+    private void jbInit() throws InterruptedException{
         JPanel contentPane = (JPanel) this.getContentPane();
         contentPane.setLayout(borderLayout1);
         this.setSize(new Dimension(213, 275));
@@ -52,18 +55,36 @@ public class Frame extends JFrame {
             System.exit(0);//Выход из системы
         });
         item3.addActionListener(e -> {
-            BotBoard data = new BotBoard(field.getMatrix());
-            Solver solver = new Solver(data);
-            status.setText("I know, what to do");
-            for (BotBoard board : solver.solution()){
-                for (int i = 0; i<4; i++){
-                    for (int j =0; j<4; j++){
-                        if (board.getBlocks()[i][j] != 0)
-                            buttons[i][j].setText("" + board.getBlocks()[i][j]);
-                        else buttons[i][j].setText("");
-                    }
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    solverMatrix.set(i, j, field.getMatrix()[i][j]);
                 }
             }
+            List<Integer> result = SolverKt.fifteenGameSolution(solverMatrix);
+            System.out.println(result);
+            status.setText("I know, what to do");
+            int show = JOptionPane.showConfirmDialog(null,
+                    "Do you want some?", "I have a solution, boi!", JOptionPane.YES_NO_OPTION);
+            if (show == JOptionPane.YES_OPTION) {
+                status.setText("I'm doing magic!!!");
+                for (int move : result) {
+
+                    field.makeMove(move);
+                    recount();
+                    /*try {
+                        Thread.sleep(1000);
+                    }
+                    catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    finally {
+                        System.out.println("rr");
+                    }
+                }
+                recount();*/
+                }
+            }
+
         });
 
 
@@ -92,6 +113,17 @@ public class Frame extends JFrame {
         contentPane.add(status, BorderLayout.SOUTH);
 
         newGame();
+    }
+
+    void recount() {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (field.getMatrix()[i][j] != 0)
+                    buttons[i][j].setText("" + field.getMatrix()[i][j]);
+                else buttons[i][j].setText("");
+
+            }
+        }
     }
 
 
@@ -127,20 +159,10 @@ public class Frame extends JFrame {
             this.posj = posJ;
         }
 
-        void recount(){
-            for (int i = 0; i<4; i++){
-                for (int j =0; j<4; j++){
-                    if (field.getMatrix()[i][j] != 0)
-                        buttons[i][j].setText("" + field.getMatrix()[i][j]);
-                    else buttons[i][j].setText("");
-                }
-            }
-        }
-
 
         public void mouseReleased(MouseEvent e) {
 
-            if (field.makeMove(posi, posj)){
+            if (field.makeMove(posi, posj)) {
                 recount();
                 status.setText("nice turn!");
             } else status.setText("it's impossible");

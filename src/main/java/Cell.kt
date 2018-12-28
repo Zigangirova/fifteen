@@ -1,0 +1,1 @@
+data class Cell(val row: Int, val column: Int)
